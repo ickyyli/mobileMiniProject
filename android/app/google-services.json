@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "572628341851",
+    "project_id": "kindisync-eb5cc",
+    "storage_bucket": "kindisync-eb5cc.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:572628341851:android:3953f987e35db086f5db7e",
+        "android_client_info": {
+          "package_name": "com.example.kindisync"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBKWVsenu29-QMUKGZ-50aVLh5mXhL-ndE"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
