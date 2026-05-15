@@ -1,105 +1,231 @@
 import 'package:flutter/material.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:intl/intl.dart';
+import 'package:qr_flutter/qr_flutter.dart';
 
-class AttendancePage extends StatelessWidget {
+class AttendancePage extends StatefulWidget {
   const AttendancePage({super.key});
 
   @override
+  State<AttendancePage> createState() => _AttendancePageState();
+}
+
+class _AttendancePageState extends State<AttendancePage> {
+  String? currentUserId;
+
+  @override
+  void initState() {
+    super.initState();
+
+    // Get logged in user ID
+    currentUserId = FirebaseAuth.instance.currentUser?.uid;
+
+    print("Current UID: $currentUserId");
+  }
+
+  @override
   Widget build(BuildContext context) {
-    // Ambil UID parent yang login (digunakan sebagai studentId)
-    final String currentUserId = FirebaseAuth.instance.currentUser!.uid;
+    return DefaultTabController(
+      length: 2,
 
-    return Scaffold(
-      backgroundColor: const Color(0xFFF8F9FA),
-      appBar: AppBar(
-        title: const Text("Rekod Kehadiran Murid", 
-          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
-        backgroundColor: Colors.deepPurple[100],
-        elevation: 0,
-        foregroundColor: const Color(0xFF2D3142),
-      ),
-      body: StreamBuilder<QuerySnapshot>(
-        // Listen kepada koleksi 'attendance' secara real-time berdasarkan studentId
-        stream: FirebaseFirestore.instance
-            .collection('attendance')
-            .where('studentId', isEqualTo: currentUserId)
-            .orderBy('timestamp', descending: true)
-            .snapshots(),
-        builder: (context, snapshot) {
-          if (snapshot.hasError) return const Center(child: Text("Ralat memuatkan data."));
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return const Center(child: CircularProgressIndicator());
-          }
+      child: Scaffold(
+        appBar: AppBar(
+          title: const Text("Attendance"),
+          centerTitle: true,
 
-          if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
-            return Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
+          bottom: const TabBar(
+            tabs: [
+
+              // QR TAB
+              Tab(
+                icon: Icon(Icons.qr_code),
+                text: "My QR",
+              ),
+
+              // HISTORY TAB
+              Tab(
+                icon: Icon(Icons.history),
+                text: "Logs",
+              ),
+            ],
+          ),
+        ),
+
+        body: currentUserId == null
+
+            // USER NOT LOGIN
+            ? const Center(
+                child: Text(
+                  "User not logged in",
+                  style: TextStyle(fontSize: 18),
+                ),
+              )
+
+            // TAB PAGES
+            : TabBarView(
                 children: [
-                  Icon(Icons.history_toggle_off_rounded, size: 80, color: Colors.grey.withOpacity(0.5)),
-                  const SizedBox(height: 16),
-                  const Text("Tiada rekod kehadiran ditemui.", 
-                    style: TextStyle(color: Colors.grey, fontWeight: FontWeight.w500)),
+
+                  // QR PAGE
+                  _buildQRPage(currentUserId!),
+
+                  // LOG PAGE
+                  _buildLogsPage(),
+
                 ],
               ),
-            );
-          }
+      ),
+    );
+  }
 
-          return ListView.builder(
-            padding: const EdgeInsets.all(16),
-            itemCount: snapshot.data!.docs.length,
-            itemBuilder: (context, index) {
-              var data = snapshot.data!.docs[index].data() as Map<String, dynamic>;
-              
-              // Safely handle timestamp
-              DateTime dateTime = DateTime.now();
-              if (data['timestamp'] != null) {
-                dateTime = (data['timestamp'] as Timestamp).toDate();
-              }
-              
-              String status = data['status'] ?? "Unknown";
+  // =====================================
+  // QR PAGE
+  // =====================================
 
-              return Container(
-                margin: const EdgeInsets.only(bottom: 12),
+  Widget _buildQRPage(String uid) {
+    return SingleChildScrollView(
+      child: Center(
+        child: Padding(
+          padding: const EdgeInsets.all(20),
+
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+
+            children: [
+
+              const SizedBox(height: 40),
+
+              const Text(
+                "Show this QR to teacher",
+                style: TextStyle(
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+
+              const SizedBox(height: 30),
+
+              // QR CARD
+              Container(
+                padding: const EdgeInsets.all(20),
+
                 decoration: BoxDecoration(
                   color: Colors.white,
-                  borderRadius: BorderRadius.circular(15),
-                  boxShadow: [
+                  borderRadius: BorderRadius.circular(20),
+
+                  boxShadow: const [
                     BoxShadow(
-                      color: Colors.black.withOpacity(0.03),
+                      color: Colors.black12,
                       blurRadius: 10,
-                      offset: const Offset(0, 4),
-                    )
+                    ),
                   ],
                 ),
-                child: ListTile(
-                  contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
-                  leading: Container(
-                    padding: const EdgeInsets.all(10),
-                    decoration: BoxDecoration(
-                      color: status == "Check-In" ? Colors.green[50] : Colors.red[50],
-                      shape: BoxShape.circle,
-                    ),
-                    child: Icon(
-                      status == "Check-In" ? Icons.login_rounded : Icons.logout_rounded,
-                      color: status == "Check-In" ? Colors.green : Colors.red,
-                    ),
-                  ),
-                  title: Text(status, 
-                    style: const TextStyle(fontWeight: FontWeight.bold, color: Color(0xFF2D3142))),
-                  subtitle: Text(
-                    DateFormat('EEEE, dd MMM yyyy\nhh:mm a').format(dateTime),
-                    style: TextStyle(color: Colors.grey[600], fontSize: 13),
-                  ),
-                  trailing: Icon(Icons.arrow_forward_ios_rounded, size: 14, color: Colors.grey[300]),
+
+                child: QrImageView(
+                  data: uid,
+                  version: QrVersions.auto,
+                  size: 250,
+
+                  backgroundColor: Colors.white,
                 ),
-              );
-            },
-          );
-        },
+              ),
+
+              const SizedBox(height: 30),
+
+              const Text(
+                "Student ID",
+                style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+
+              const SizedBox(height: 10),
+
+              SelectableText(
+                uid,
+                style: const TextStyle(
+                  color: Colors.grey,
+                ),
+              ),
+            ],
+          ),
+        ),
       ),
+    );
+  }
+
+  // =====================================
+  // LOGS PAGE
+  // =====================================
+
+  Widget _buildLogsPage() {
+    return ListView(
+      padding: const EdgeInsets.all(16),
+
+      children: [
+
+        // SAMPLE LOG 1
+        Card(
+          child: ListTile(
+            leading: CircleAvatar(
+              backgroundColor: Colors.green,
+
+              child: const Icon(
+                Icons.login,
+                color: Colors.white,
+              ),
+            ),
+
+            title: const Text("Check In"),
+
+            subtitle: const Text(
+              "15 May 2026 - 7:30 AM",
+            ),
+          ),
+        ),
+
+        const SizedBox(height: 10),
+
+        // SAMPLE LOG 2
+        Card(
+          child: ListTile(
+            leading: CircleAvatar(
+              backgroundColor: Colors.red,
+
+              child: const Icon(
+                Icons.logout,
+                color: Colors.white,
+              ),
+            ),
+
+            title: const Text("Check Out"),
+
+            subtitle: const Text(
+              "15 May 2026 - 12:30 PM",
+            ),
+          ),
+        ),
+
+        const SizedBox(height: 10),
+
+        // SAMPLE LOG 3
+        Card(
+          child: ListTile(
+            leading: CircleAvatar(
+              backgroundColor: Colors.green,
+
+              child: const Icon(
+                Icons.login,
+                color: Colors.white,
+              ),
+            ),
+
+            title: const Text("Check In"),
+
+            subtitle: const Text(
+              "14 May 2026 - 7:35 AM",
+            ),
+          ),
+        ),
+      ],
     );
   }
 }

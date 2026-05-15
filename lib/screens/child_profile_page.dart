@@ -7,13 +7,14 @@ class ChildProfilePage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Mendapatkan ID user yang sedang log masuk
     final String? userId = FirebaseAuth.instance.currentUser?.uid;
 
     return Scaffold(
-      appBar: AppBar(title: const Text("Child Profile")),
+      appBar: AppBar(
+        title: const Text("Child Profile"),
+        centerTitle: true,
+      ),
       body: FutureBuilder<DocumentSnapshot>(
-        // Anda perlu pastikan dokumen ID dalam Firestore sama dengan UID user
         future: FirebaseFirestore.instance.collection('users').doc(userId).get(),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
@@ -25,6 +26,10 @@ class ChildProfilePage extends StatelessWidget {
 
           var userData = snapshot.data!.data() as Map<String, dynamic>;
 
+          // Ambil URL gambar, cek jika null atau kosong
+          String? imageUrl = userData['profileImageUrl'];
+          bool hasImage = imageUrl != null && imageUrl.isNotEmpty;
+
           return SingleChildScrollView(
             padding: const EdgeInsets.all(20),
             child: Column(
@@ -33,19 +38,20 @@ class ChildProfilePage extends StatelessWidget {
                   child: CircleAvatar(
                     radius: 60,
                     backgroundColor: Colors.deepPurple,
-                    backgroundImage: userData['profileImageUrl'] != null 
-                        ? NetworkImage(userData['profileImageUrl']) 
-                        : null,
-                    child: userData['profileImageUrl'] == null 
+                    backgroundImage: hasImage ? NetworkImage(imageUrl) : null,
+                    child: !hasImage 
                         ? const Icon(Icons.person, size: 80, color: Colors.white) 
                         : null,
                   ),
                 ),
-                const SizedBox(height: 20),
-                _buildInfoCard("Full Name", userData['fullName'] ?? "N/A"),
+                const SizedBox(height: 30),
+                
+                // MENGGUNAKAN 'student_name' SEPERTI DI DATABASE
+                _buildInfoCard("Full Name", userData['student_name'] ?? "N/A"),
+                
                 _buildInfoCard("Age", "${userData['age'] ?? 'N/A'} Years Old"),
                 _buildInfoCard("Class", userData['className'] ?? "N/A"),
-                _buildInfoCard("Assigned Teacher", userData['teacherName'] ?? "Assigning..."),
+                _buildInfoCard("Assigned Teacher", userData['teacherName'] ?? "Teacher Not Assigned"),
               ],
             ),
           );
@@ -56,10 +62,13 @@ class ChildProfilePage extends StatelessWidget {
 
   Widget _buildInfoCard(String label, String value) {
     return Card(
-      margin: const EdgeInsets.only(bottom: 12),
+      elevation: 2,
+      margin: const EdgeInsets.only(bottom: 15),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       child: ListTile(
-        title: Text(label, style: const TextStyle(fontSize: 12, color: Colors.grey)),
-        subtitle: Text(value, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+        contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+        title: Text(label, style: const TextStyle(fontSize: 13, color: Colors.grey)),
+        subtitle: Text(value, style: const TextStyle(fontSize: 17, fontWeight: FontWeight.bold, color: Colors.black87)),
       ),
     );
   }

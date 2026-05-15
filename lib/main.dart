@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
-import 'firebase_options.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
@@ -14,12 +13,7 @@ import 'screens/forgot_password.dart';
 import 'screens/teacher_dashboard.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  
-  // Using the shared Firebase project configuration
-  await Firebase.initializeApp(
-    options: DefaultFirebaseOptions.currentPlatform,
-  );
-  
+  await Firebase.initializeApp(); // Required for Firebase to work
   runApp(const MyApp());
 }
 
