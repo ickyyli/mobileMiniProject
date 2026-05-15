@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'broadcast_announcement.dart';
-import 'qr_scanner_page.dart'; 
+import 'qr_scanner_page.dart';
+import 'activity_log_page.dart';
+import 'student_selection_page.dart';
 
 class TeacherDashboard extends StatelessWidget {
   const TeacherDashboard({super.key});
@@ -10,7 +12,7 @@ class TeacherDashboard extends StatelessWidget {
   void _logout(BuildContext context) async {
     await FirebaseAuth.instance.signOut();
     // Assuming Farah's login page is named 'LoginPage' or similar
-    // Navigator.of(context).pushReplacementNamed('/login'); 
+    // Navigator.of(context).pushReplacementNamed('/login');
   }
 
   @override
@@ -37,7 +39,7 @@ class TeacherDashboard extends StatelessWidget {
               const Text(
                 'Hello, Teacher!',
                 style: TextStyle(
-                  fontSize: 26, 
+                  fontSize: 26,
                   fontWeight: FontWeight.bold,
                   color: Colors.teal,
                 ),
@@ -47,7 +49,7 @@ class TeacherDashboard extends StatelessWidget {
                 style: TextStyle(fontSize: 16, color: Colors.grey),
               ),
               const SizedBox(height: 30),
-              
+
               // Grid for your specific Teacher Module tasks
               GridView.count(
                 shrinkWrap: true,
@@ -57,41 +59,51 @@ class TeacherDashboard extends StatelessWidget {
                 mainAxisSpacing: 15,
                 children: [
                   _dashboardItem(
-                    context, 
-                    'Daily Attendance', 
-                    Icons.qr_code_2, 
+                    context,
+                    'Daily Attendance',
+                    Icons.qr_code_2,
                     Colors.blueAccent,
                     () {
                       // Updated to navigate to the QR Scanner
                       Navigator.push(
                         context,
-                        MaterialPageRoute(builder: (context) => const QRScannerPage()),
+                        MaterialPageRoute(
+                            builder: (context) => const QRScannerPage()),
                       );
                     },
                   ),
                   _dashboardItem(
-                    context, 
-                    'Student List', 
-                    Icons.groups_rounded, 
+                    context,
+                    'Student List',
+                    Icons.groups_rounded,
                     Colors.orangeAccent,
                     () => print('Navigate to Student List'),
                   ),
                   _dashboardItem(
-                    context, 
-                    'Daily Activity', 
-                    Icons.menu_book_rounded, 
+                    context,
+                    'Daily Activity',
+                    Icons.menu_book_rounded,
                     Colors.greenAccent,
-                    () => print('Navigate to Daily Logs'),
+                    () {
+                      // Navigates to your new activity logging page
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) => const StudentSelectionPage()),
+                      );
+                    },
                   ),
                   _dashboardItem(
-                    context, 
+                    context,
                     'Send Broadcast',
                     Icons.campaign,
                     Colors.purpleAccent,
                     () {
                       Navigator.push(
                         context,
-                        MaterialPageRoute(builder: (context) => const BroadcastAnnouncement()),
+                        MaterialPageRoute(
+                            builder: (context) =>
+                                const BroadcastAnnouncement()),
                       );
                     },
                   ),
@@ -105,7 +117,8 @@ class TeacherDashboard extends StatelessWidget {
   }
 
   // Custom widget for the dashboard buttons
-  Widget _dashboardItem(BuildContext context, String title, IconData icon, Color color, VoidCallback onTap) {
+  Widget _dashboardItem(BuildContext context, String title, IconData icon,
+      Color color, VoidCallback onTap) {
     return InkWell(
       onTap: onTap,
       borderRadius: BorderRadius.circular(15),
