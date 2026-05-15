@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'broadcast_announcement.dart';
 import 'qr_scanner_page.dart';
-import 'activity_log_page.dart';
 import 'student_selection_page.dart';
 
 class TeacherDashboard extends StatelessWidget {
