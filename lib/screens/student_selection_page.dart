@@ -31,16 +31,17 @@ class StudentSelectionPage extends StatelessWidget {
           return ListView.builder(
             itemCount: snapshot.data!.docs.length,
             itemBuilder: (context, index) {
-              var userData = snapshot.data!.docs[index];
-              // Using student_name from your Firestore structure
-              String studentName =
-                  userData['student_name'] ?? 'Unknown Student';
-              // This is the ID you manually added to the console
-              // This checks if the data map contains the key before trying to read it
-              Map<String, dynamic> data =
-                  userData.data() as Map<String, dynamic>;
-              String studentId =
-                  data.containsKey('student_id') ? data['student_id'] : 'No-ID';
+              // Get the document snapshot
+              var doc = snapshot.data!.docs[index];
+
+              // Convert to a Map safely
+              Map<String, dynamic> data = doc.data() as Map<String, dynamic>;
+
+              // Extract fields with fallback values to avoid null errors
+              String studentName = data['student_name'] ?? 'Unknown Student';
+              String studentId = data['student_id'] ??
+                  doc.id; // Fallback to Firestore Doc ID if student_id is missing
+              String className = data['className'] ?? 'Not Assigned';
 
               return ListTile(
                 leading: const CircleAvatar(
@@ -48,10 +49,10 @@ class StudentSelectionPage extends StatelessWidget {
                   child: Icon(Icons.person, color: Colors.white),
                 ),
                 title: Text(studentName),
-                subtitle: Text('Class: ${userData['className']}'),
+                subtitle:
+                    Text('Class: $className'), // Using the variable from Step 1
                 trailing: const Icon(Icons.arrow_forward_ios, size: 16),
                 onTap: () {
-                  // Now we pass the REQUIRED parameters to the log page
                   Navigator.push(
                     context,
                     MaterialPageRoute(

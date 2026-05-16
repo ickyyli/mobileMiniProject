@@ -4,15 +4,20 @@ import 'broadcast_announcement.dart';
 import 'qr_scanner_page.dart';
 import 'activity_log_page.dart';
 import 'student_selection_page.dart';
+import 'student_list_page.dart';
 
 class TeacherDashboard extends StatelessWidget {
   const TeacherDashboard({super.key});
 
   // Simple function to handle logout
   void _logout(BuildContext context) async {
+    // 1. Sign out from Firebase
     await FirebaseAuth.instance.signOut();
-    // Assuming Farah's login page is named 'LoginPage' or similar
-    // Navigator.of(context).pushReplacementNamed('/login');
+
+    // 2. Navigate back to the LoginPage (the '/' route we defined in main.dart)
+    if (context.mounted) {
+      Navigator.pushNamedAndRemoveUntil(context, '/', (route) => false);
+    }
   }
 
   @override
@@ -77,7 +82,13 @@ class TeacherDashboard extends StatelessWidget {
                     'Student List',
                     Icons.groups_rounded,
                     Colors.orangeAccent,
-                    () => print('Navigate to Student List'),
+                    () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) => const StudentListPage()),
+                      );
+                    },
                   ),
                   _dashboardItem(
                     context,
