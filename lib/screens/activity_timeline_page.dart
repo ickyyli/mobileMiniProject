@@ -8,53 +8,66 @@ class ActivityTimelinePage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final String? userId = FirebaseAuth.instance.currentUser?.uid;
+    final String? parentUid = FirebaseAuth.instance.currentUser?.uid;
 
     return Scaffold(
       appBar: AppBar(
         title: const Text("Daily Activity Proof"),
         backgroundColor: Colors.deepPurple[50],
       ),
-      body: StreamBuilder<QuerySnapshot>(
-        // Menapis aktiviti berdasarkan studentId (UID parent/anak)
-        stream: FirebaseFirestore.instance
-            .collection('activities')
-            .where('studentId', isEqualTo: userId)
-            .orderBy('timestamp', descending: true)
-            .snapshots(),
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return const Center(child: CircularProgressIndicator());
-          }
+      body: parentUid == null 
+          ? const Center(child: Text("Please log in to view activities."))
+          : FutureBuilder<DocumentSnapshot>(
+              future: FirebaseFirestore.instance.collection('users').doc(parentUid).get(),
+              builder: (context, userSnapshot) {
+                if (userSnapshot.connectionState == ConnectionState.waiting) {
+                  return const Center(child: CircularProgressIndicator());
+                }
+                if (!userSnapshot.hasData || !userSnapshot.data!.exists) {
+                  return const Center(child: Text("Parent profile not found."));
+                }
 
-          if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
-            return const Center(
-              child: Text("No activities recorded for today yet."),
-            );
-          }
+                var userData = userSnapshot.data!.data() as Map<String, dynamic>;
+                String myChildId = userData['student_id'] ?? '';
 
-          return ListView.builder(
-            padding: const EdgeInsets.all(16),
-            itemCount: snapshot.data!.docs.length,
-            itemBuilder: (context, index) {
-              var activity = snapshot.data!.docs[index].data() as Map<String, dynamic>;
-              
-              // Format masa dari Timestamp Firestore
-              DateTime date = (activity['timestamp'] as Timestamp).toDate();
-              String formattedTime = DateFormat('hh:mm a').format(date);
+                return StreamBuilder<QuerySnapshot>(
+                  stream: FirebaseFirestore.instance
+                      .collection('activities')
+                      .where('student_id', isEqualTo: myChildId)
+                      .orderBy('timestamp', descending: true)
+                      .snapshots(),
+                  builder: (context, snapshot) {
+                    if (snapshot.connectionState == ConnectionState.waiting) {
+                      return const Center(child: CircularProgressIndicator());
+                    }
 
-              return _buildActivityCard(
-                context,
-                time: formattedTime,
-                title: activity['title'] ?? 'Activity',
-                description: activity['description'] ?? '',
-                imageUrl: activity['imageUrl'], // URL gambar dari cikgu
-                type: activity['type'] ?? 'general',
-              );
-            },
-          );
-        },
-      ),
+                    if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
+                      return const Center(child: Text("No activities recorded for today yet."));
+                    }
+
+                    return ListView.builder(
+                      padding: const EdgeInsets.all(16),
+                      itemCount: snapshot.data!.docs.length,
+                      itemBuilder: (context, index) {
+                        var activity = snapshot.data!.docs[index].data() as Map<String, dynamic>;
+                        
+                        DateTime date = (activity['timestamp'] as Timestamp?)?.toDate() ?? DateTime.now();
+                        String formattedTime = DateFormat('hh:mm a').format(date);
+
+                        return _buildActivityCard(
+                          context,
+                          time: formattedTime,
+                          title: "${activity['emotion_emoji'] ?? ''} ${activity['emotion_label'] ?? 'Activity'}",
+                          description: activity['activity_details'] ?? '',
+                          imageUrl: activity['image_url'],
+                          type: activity['emotion_label'] ?? 'general',
+                        );
+                      },
+                    );
+                  },
+                );
+              },
+            ),
     );
   }
 
@@ -66,77 +79,53 @@ class ActivityTimelinePage extends StatelessWidget {
     required String type
   }) {
     return Card(
-      margin: const EdgeInsets.only(bottom: 20),
+      margin: const EdgeInsets.only(bottom: 16),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
-      clipBehavior: Clip.antiAlias,
       elevation: 2,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Bahagian Gambar (Proof)
           if (imageUrl != null && imageUrl.isNotEmpty)
-            AspectRatio(
-              aspectRatio: 16 / 9,
+            ClipRRect(
+              borderRadius: const BorderRadius.vertical(top: Radius.circular(15)),
               child: Image.network(
                 imageUrl,
+                height: 200,
+                width: double.infinity,
                 fit: BoxFit.cover,
                 loadingBuilder: (context, child, loadingProgress) {
                   if (loadingProgress == null) return child;
-                  return Container(
-                    color: Colors.grey[200],
-                    child: const Center(child: CircularProgressIndicator()),
+                  return const SizedBox(
+                    height: 200,
+                    child: Center(child: CircularProgressIndicator()),
                   );
                 },
                 errorBuilder: (context, error, stackTrace) => Container(
-                  color: Colors.grey[300],
-                  child: const Icon(Icons.broken_image, size: 50),
+                  height: 200,
+                  color: Colors.grey[200],
+                  child: const Icon(Icons.broken_image, size: 50, color: Colors.grey),
                 ),
               ),
             ),
-          
           Padding(
-            padding: const EdgeInsets.all(16.0),
+            padding: const EdgeInsets.all(12.0),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Text(
-                      title,
-                      style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                    ),
-                    Text(
-                      time,
-                      style: const TextStyle(color: Colors.deepPurple, fontWeight: FontWeight.w600),
-                    ),
+                    Text(title, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+                    Text(time, style: const TextStyle(color: Colors.deepPurple, fontSize: 12)),
                   ],
                 ),
-                const SizedBox(height: 8),
-                Text(
-                  description,
-                  style: TextStyle(color: Colors.grey[800], height: 1.4),
-                ),
-                const SizedBox(height: 10),
-                Chip(
-                  label: Text(type.toUpperCase(), style: const TextStyle(fontSize: 10, color: Colors.white)),
-                  backgroundColor: _getTypeColor(type),
-                  visualDensity: VisualDensity.compact,
-                ),
+                const SizedBox(height: 4),
+                Text(description, style: const TextStyle(color: Colors.black54)),
               ],
             ),
           ),
-        ],
+        ], // Closed the Column children list properly here
       ),
     );
-  }
-
-  Color _getTypeColor(String type) {
-    switch (type.toLowerCase()) {
-      case 'meal': return Colors.orange;
-      case 'nap': return Colors.blue;
-      case 'learning': return Colors.green;
-      default: return Colors.deepPurple;
-    }
   }
 }

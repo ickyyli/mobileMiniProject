@@ -53,45 +53,59 @@ class _ActivityLogPageState extends State<ActivityLogPage> {
       return;
     }
 
+    // Show a loading indicator
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => const Center(child: CircularProgressIndicator()),
+    );
+
     try {
       String imageUrl = "";
 
-      // 1. Try to upload the image
+      // 1. Upload Image if selected
       if (_selectedImage != null) {
         try {
-          String fileName =
-              'activity_${DateTime.now().millisecondsSinceEpoch}.jpg';
+          String fileName = 'activity_${DateTime.now().millisecondsSinceEpoch}.jpg';
           Reference ref = FirebaseStorage.instance
               .ref()
               .child('daily_activities')
               .child(fileName);
 
-          // Use putFile and wait for completion
           TaskSnapshot snapshot = await ref.putFile(_selectedImage!);
           imageUrl = await snapshot.ref.getDownloadURL();
         } catch (imageError) {
-          debugPrint(
-              "Image upload failed but continuing with text: $imageError");
-          // We don't stop the whole function, just proceed without the image URL
+          debugPrint("Image upload failed: $imageError");
+          // Optionally notify the user, but we continue to save the text update
         }
       }
 
-      // 2. Save everything to Firestore
+      // 2. Save to 'activities' collection
+      // Ensure 'student_id' matches the field in your 'users' collection (e.g., "S003")
       await FirebaseFirestore.instance.collection('activities').add({
         'student_id': widget.studentId,
         'student_name': widget.studentName,
         'activity_details': _activityController.text,
-        'emotion_rating': _selectedEmotion,
+        'emotion_label': _emotions.firstWhere((e) => e['value'] == _selectedEmotion)['label'],
+        'emotion_emoji': _emotions.firstWhere((e) => e['value'] == _selectedEmotion)['emoji'],
         'image_url': imageUrl,
-        'date': DateTime.now().toIso8601String(),
-        'teacher_name': 'Teacher Aisyah',
+        'timestamp': FieldValue.serverTimestamp(), // Use server time for accurate sorting
+        'teacher_name': 'Teacher Bunga', // Matching your Firestore screenshot
       });
 
       if (mounted) {
-        Navigator.pop(context);
+        Navigator.pop(context); // Close loading dialog
+        Navigator.pop(context); // Go back to selection page
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Update posted successfully!')),
+        );
       }
     } catch (e) {
+      if (mounted) Navigator.pop(context); // Close loading dialog
       debugPrint("Error saving: $e");
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Failed to save activity: $e')),
+      );
     }
   }
 
