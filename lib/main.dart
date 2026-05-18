@@ -8,12 +8,17 @@ import 'screens/admin_dashboard.dart';
 import 'screens/parent_dashboard.dart'; 
 import 'screens/forgot_password.dart'; 
 
-// --- YOUR PAGE IMPORT ---
-// Updated to match your original main.dart import path
+// Teacher Dashboard
 import 'screens/teacher_dashboard.dart';
+
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await Firebase.initializeApp(); // Required for Firebase to work
+  
+  // Using the shared Firebase project configuration
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
+  
   runApp(const MyApp());
 }
 
@@ -26,12 +31,19 @@ class MyApp extends StatelessWidget {
       title: 'KindiSync',
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
-        // Using Teal to match your Teacher Dashboard theme
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.teal),
         useMaterial3: true,
       ),
-      // App starts at Login; redirected to TeacherDashboard based on credentials
-      home: const LoginPage(), 
+      // 1. Define the initial route (where the app starts)
+      initialRoute: '/',
+      
+      // 2. Define the route names
+      routes: {
+        '/': (context) => const LoginPage(),
+        '/teacher_dashboard': (context) => const TeacherDashboard(),
+        // You can add others here too if you want to use them by name:
+        // '/admin_dashboard': (context) => const AdminDashboard(),
+      },
     );
   }
 }
@@ -59,22 +71,22 @@ class _LoginPageState extends State<LoginPage> {
 
     setState(() => _isLoading = true);
 
-    // 1. ADMIN LOGIN (Farah's Logic)
+    // 1. ADMIN LOGIN
     if (email == "admin@kindisync.com" && password == "admin123") {
       _logToFirestore('admin_login', email);
       _navigateTo(const AdminDashboard());
       return;
     }
 
-    // 2. TEACHER LOGIN (Added for your module)
-    // Use these credentials to view your Teacher Dashboard
+    // 2. TEACHER LOGIN
     if (email == "teacher@kindisync.com" && password == "teacher123") {
       _logToFirestore('teacher_login', email);
+      // Using pushReplacement to prevent going back to login
       _navigateTo(const TeacherDashboard());
       return;
     }
 
-    // 3. PARENT LOGIN (Firebase Auth)
+    // 3. PARENT LOGIN
     try {
       await FirebaseAuth.instance.signInWithEmailAndPassword(
         email: email,

@@ -13,25 +13,20 @@ class ParentDashboard extends StatelessWidget {
   const ParentDashboard({super.key});
 
   @override
- Widget build(BuildContext context) {
+  Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color(0xFFF8F9FA),
-
       appBar: AppBar(
         title: const Text(
           "Parent Dashboard",
           style: TextStyle(fontWeight: FontWeight.bold),
         ),
-
         backgroundColor: Colors.deepPurple[100],
         elevation: 0,
-
         actions: [
-
           // NOTIFICATION BUTTON
           IconButton(
             icon: const Icon(Icons.notifications_none_rounded),
-
             onPressed: () {
               Navigator.push(
                 context,
@@ -45,20 +40,15 @@ class ParentDashboard extends StatelessWidget {
           // LOGOUT BUTTON
           IconButton(
             icon: const Icon(Icons.logout_rounded),
-
             onPressed: () async {
-
               await FirebaseAuth.instance.signOut();
 
               if (context.mounted) {
-
                 Navigator.pushAndRemoveUntil(
                   context,
-
                   MaterialPageRoute(
                     builder: (context) => const LoginPage(),
                   ),
-
                   (route) => false,
                 );
               }
@@ -66,19 +56,14 @@ class ParentDashboard extends StatelessWidget {
           ),
         ],
       ),
-
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16),
-
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
-
           children: [
-
             // TITLE
             const Text(
               "Main Menu",
-
               style: TextStyle(
                 fontSize: 18,
                 fontWeight: FontWeight.bold,
@@ -101,7 +86,6 @@ class ParentDashboard extends StatelessWidget {
               childAspectRatio: 2.1,
 
               children: [
-
                 // CHILD PROFILE
                 _buildWideMenuCard(
                   context,
@@ -174,28 +158,20 @@ class ParentDashboard extends StatelessWidget {
     Color color,
     Widget destination,
   ) {
-
     return InkWell(
-
       onTap: () {
-
         Navigator.push(
           context,
-
           MaterialPageRoute(
             builder: (context) => destination,
           ),
         );
       },
-
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 12),
-
         decoration: BoxDecoration(
           color: Colors.white,
-
           borderRadius: BorderRadius.circular(12),
-
           boxShadow: [
             BoxShadow(
               color: Colors.black.withValues(alpha: 0.04),
@@ -203,26 +179,20 @@ class ParentDashboard extends StatelessWidget {
               offset: const Offset(0, 2),
             ),
           ],
-
           border: Border.all(
             color: Colors.grey.withValues(alpha: 0.1),
           ),
         ),
-
         child: Row(
           mainAxisAlignment: MainAxisAlignment.start,
-
           children: [
-
             // ICON BOX
             Container(
               padding: const EdgeInsets.all(8),
-
               decoration: BoxDecoration(
                 color: color.withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(8),
               ),
-
               child: Icon(
                 icon,
                 size: 24,
@@ -236,13 +206,11 @@ class ParentDashboard extends StatelessWidget {
             Expanded(
               child: Text(
                 title,
-
                 style: const TextStyle(
                   fontWeight: FontWeight.bold,
                   fontSize: 13,
                   color: Color(0xFF2D3142),
                 ),
-
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
               ),
