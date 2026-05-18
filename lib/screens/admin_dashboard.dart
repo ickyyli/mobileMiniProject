@@ -3,10 +3,10 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../main.dart'; 
 import 'register_student_page.dart';
-// Import StudentQrPage untuk senarai QR
 import 'student_qr_page.dart'; 
 import 'broadcast_page.dart'; 
 import 'settings_menu_page.dart'; 
+import 'admin_payment_page.dart'; 
 
 class AdminDashboard extends StatelessWidget {
   const AdminDashboard({super.key});
@@ -16,8 +16,10 @@ class AdminDashboard extends StatelessWidget {
     return Scaffold(
       backgroundColor: const Color(0xFFF1F3F6),
       appBar: AppBar(
-        title: const Text("KindiSync Admin", 
-          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
+        title: const Text(
+          "KindiSync Admin", 
+          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+        ),
         backgroundColor: Colors.white,
         foregroundColor: const Color(0xFF2D3142),
         elevation: 0.5,
@@ -53,7 +55,7 @@ class AdminDashboard extends StatelessWidget {
             ),
             const SizedBox(height: 16),
             
-            // Stats Bar
+            // Stats Bar - Diperbaiki menggunakan pecahan StreamBuilder yang berasingan
             Container(
               padding: const EdgeInsets.symmetric(vertical: 20),
               decoration: BoxDecoration(
@@ -61,29 +63,60 @@ class AdminDashboard extends StatelessWidget {
                 borderRadius: BorderRadius.circular(12),
                 border: Border.all(color: Colors.grey.withValues(alpha: 0.2)),
                 boxShadow: [
-                  BoxShadow(color: Colors.black.withValues(alpha: 0.03), blurRadius: 10, offset: const Offset(0, 4)),
+                  BoxShadow(
+                    color: Colors.black.withValues(alpha: 0.03), 
+                    blurRadius: 10, 
+                    offset: const Offset(0, 4),
+                  ),
                 ],
               ),
-              child: StreamBuilder<QuerySnapshot>(
-                stream: FirebaseFirestore.instance.collection('users').snapshots(),
-                builder: (context, snapshot) {
-                  String studentCount = "0";
-                  if (snapshot.hasData) {
-                    studentCount = snapshot.data!.docs
-                        .where((doc) => doc['role'] == 'parent')
-                        .length
-                        .toString();
-                  }
-
-                  return Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceAround,
-                    children: [
-                      _buildStatItem(studentCount, "Students"),
-                      _buildStatItem("0", "Activities"),
-                      _buildStatItem("0", "Due"),
-                    ],
-                  );
-                },
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceAround,
+                children: [
+                  // 1. Kaunter Dinamik Pelajar (Users dengan peranan parent)
+                  StreamBuilder<QuerySnapshot>(
+                    stream: FirebaseFirestore.instance
+                        .collection('users')
+                        .where('role', isEqualTo: 'parent')
+                        .snapshots(),
+                    builder: (context, snapshot) {
+                      String count = "0";
+                      if (snapshot.hasData) {
+                        count = snapshot.data!.docs.length.toString();
+                      }
+                      return _buildStatItem(count, "Students");
+                    },
+                  ),
+                  
+                  // 2. Kaunter Dinamik Aktiviti
+                  StreamBuilder<QuerySnapshot>(
+                    stream: FirebaseFirestore.instance.collection('activities').snapshots(),
+                    builder: (context, snapshot) {
+                      String count = "0";
+                      if (snapshot.hasData) {
+                        count = snapshot.data!.docs.length.toString();
+                      }
+                      return _buildStatItem(count, "Activities");
+                    },
+                  ),
+                  
+                  // 3. Kaunter Dinamik Invois Tertunggak (Koleksi payment)
+                  StreamBuilder<QuerySnapshot>(
+                    stream: FirebaseFirestore.instance.collection('payment').snapshots(),
+                    builder: (context, snapshot) {
+                      String count = "0";
+                      if (snapshot.hasData) {
+                        // Menapis invois berciri kes yang mempunyai status bukan paid
+                        final dueDocs = snapshot.data!.docs.where((doc) {
+                          String status = (doc['status'] ?? '').toString().toLowerCase();
+                          return status == 'pending' || status == 'overdue';
+                        }).toList();
+                        count = dueDocs.length.toString();
+                      }
+                      return _buildStatItem(count, "Due");
+                    },
+                  ),
+                ],
               ),
             ),
             const SizedBox(height: 24),
@@ -111,11 +144,10 @@ class AdminDashboard extends StatelessWidget {
                   () => Navigator.push(context, MaterialPageRoute(builder: (context) => const RegisterStudentPage())),
                 ),
                 
-                // PERUBAHAN DI SINI: Attendance kini pergi ke StudentQrPage
                 _buildActionCard(
                   context, 
                   "Attendance", 
-                  Icons.qr_code_rounded, // Tukar ikon kepada QR supaya lebih jelas
+                  Icons.qr_code_rounded, 
                   Colors.blue, 
                   () => Navigator.push(context, MaterialPageRoute(builder: (context) => const StudentQrPage())),
                 ),
@@ -135,7 +167,18 @@ class AdminDashboard extends StatelessWidget {
                   }
                 ),
                 
-                _buildActionCard(context, "Payments", Icons.payment_rounded, Colors.green, () {}),
+                _buildActionCard(
+                  context, 
+                  "Payments", 
+                  Icons.payment_rounded, 
+                  Colors.green, 
+                  () {
+                    Navigator.push(
+                      context, 
+                      MaterialPageRoute(builder: (context) => const AdminPaymentPage()),
+                    );
+                  }
+                ),
                 
                 _buildActionCard(
                   context, 
