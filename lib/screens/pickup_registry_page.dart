@@ -19,11 +19,38 @@ class _PickupRegistryPageState extends State<PickupRegistryPage> {
   final _picker = ImagePicker();
   bool _isLoading = false;
 
-  // Fungsi untuk mengambil gambar dari galeri
+  // Variable baru untuk simpan data murid secara automatik
+  String _studentName = '';
+  String _studentId = '';
+
+  @override
+  void initState() {
+    super.initState();
+    _fetchStudentData(); 
+  }
+
+  
+  Future<void> _fetchStudentData() async {
+    try {
+      final String uid = FirebaseAuth.instance.currentUser!.uid;
+      DocumentSnapshot userDoc = await FirebaseFirestore.instance.collection('users').doc(uid).get();
+
+      if (userDoc.exists && userDoc.data() != null) {
+        final data = userDoc.data() as Map<String, dynamic>;
+        setState(() {
+          _studentName = data['student_name'] ?? 'Unknown Student';
+          _studentId = data['student_id'] ?? '';
+        });
+      }
+    } catch (e) {
+      debugPrint("Gagal mengambil data murid: $e");
+    }
+  }
+
   Future<void> _pickImage() async {
     final pickedFile = await _picker.pickImage(
       source: ImageSource.gallery,
-      imageQuality: 50, // Mengurangkan saiz fail untuk jimat storage
+      imageQuality: 50,
     );
 
     if (pickedFile != null) {
@@ -33,9 +60,7 @@ class _PickupRegistryPageState extends State<PickupRegistryPage> {
     }
   }
 
-  // Fungsi utama untuk simpan ke Firebase
   Future<void> _saveGuardian() async {
-    // Validasi input
     if (_nameController.text.trim().isEmpty || _image == null) {
       _showSnackBar("Please enter the guardian's name and select a photo.", Colors.red);
       return;
@@ -46,23 +71,23 @@ class _PickupRegistryPageState extends State<PickupRegistryPage> {
     try {
       final String uid = FirebaseAuth.instance.currentUser!.uid;
       
-      // 1. MUAT NAIK GAMBAR KE FIREBASE STORAGE
       String fileName = 'pickups/${uid}_${DateTime.now().millisecondsSinceEpoch}.jpg';
       Reference storageRef = FirebaseStorage.instance.ref().child(fileName);
       
       UploadTask uploadTask = storageRef.putFile(_image!);
       TaskSnapshot snapshot = await uploadTask;
       
-      // Dapatkan URL gambar yang telah diupload
       String imageUrl = await snapshot.ref.getDownloadURL();
 
-      // 2. SIMPAN DATA KE CLOUD FIRESTORE
+      
       await FirebaseFirestore.instance.collection('pickup_requests').add({
         'parentUid': uid,
+        'student_name': _studentName, // <-- Disimpan di sini
+        'student_id': _studentId,     // <-- Disimpan di sini (cth: S001)
         'guardianName': _nameController.text.trim(),
         'relation': _relationController.text.trim(),
         'imageUrl': imageUrl,
-        'status': 'pending', // Menunggu pengesahan admin/guru
+        'status': 'pending',
         'timestamp': FieldValue.serverTimestamp(),
       });
 
@@ -102,13 +127,21 @@ class _PickupRegistryPageState extends State<PickupRegistryPage> {
               style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 8),
+            // Paparkan info murid secara automatik supaya parent tahu ini untuk anak mereka
+            if (_studentName.isNotEmpty)
+              Padding(
+                padding: const EdgeInsets.only(bottom: 8.0),
+                child: Text(
+                  "Registering guardian for: $_studentName ($_studentId)",
+                  style: const TextStyle(color: Colors.deepPurple, fontWeight: FontWeight.w600),
+                ),
+              ),
             const Text(
               "Ensure the guardian's face is clear for teacher reference.",
               style: TextStyle(color: Colors.grey),
             ),
             const SizedBox(height: 32),
 
-            // Bahagian Gambar
             Center(
               child: GestureDetector(
                 onTap: _pickImage,
@@ -138,7 +171,6 @@ class _PickupRegistryPageState extends State<PickupRegistryPage> {
             ),
             const SizedBox(height: 32),
 
-            // Input Nama
             TextField(
               controller: _nameController,
               decoration: InputDecoration(
@@ -149,7 +181,6 @@ class _PickupRegistryPageState extends State<PickupRegistryPage> {
             ),
             const SizedBox(height: 20),
 
-            // Input Hubungan
             TextField(
               controller: _relationController,
               decoration: InputDecoration(
@@ -160,7 +191,6 @@ class _PickupRegistryPageState extends State<PickupRegistryPage> {
             ),
             const SizedBox(height: 40),
 
-            // Butang Hantar
             _isLoading
                 ? const Center(child: CircularProgressIndicator())
                 : ElevatedButton(

@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart'; // Tambah ini untuk Firestore
+import 'teacher_pickup_approval_page.dart'; // Tambah ini untuk navigasi page approval
 import 'broadcast_announcement.dart';
 import 'qr_scanner_page.dart';
 import 'student_selection_page.dart';
@@ -119,6 +121,79 @@ class TeacherDashboard extends StatelessWidget {
                   ),
                 ],
               ),
+              
+              
+              const SizedBox(height: 25),
+              StreamBuilder<QuerySnapshot>(
+                stream: FirebaseFirestore.instance
+                    .collection('pickup_requests')
+                    .where('status', isEqualTo: 'pending')
+                    .snapshots(),
+                builder: (context, snapshot) {
+                  int pendingCount = snapshot.hasData ? snapshot.data!.docs.length : 0;
+
+                  return Container(
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(15),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.grey.withOpacity(0.15),
+                          spreadRadius: 1,
+                          blurRadius: 8,
+                          offset: const Offset(0, 3),
+                        ),
+                      ],
+                    ),
+                    child: ListTile(
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(builder: (context) => const TeacherPickupApprovalPage()),
+                        );
+                      },
+                      contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
+                      leading: CircleAvatar(
+                        radius: 25,
+                        backgroundColor: Colors.amber[50],
+                        child: const Icon(Icons.assignment_ind_rounded, color: Colors.amber, size: 28),
+                      ),
+                      title: const Text(
+                        "Guardian Pickup Requests",
+                        style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
+                      ),
+                      subtitle: Text(
+                        pendingCount > 0 
+                            ? "$pendingCount request(s) waiting for approval" 
+                            : "No pending requests",
+                        style: TextStyle(
+                          color: pendingCount > 0 ? Colors.redAccent : Colors.grey,
+                          fontWeight: pendingCount > 0 ? FontWeight.w500 : FontWeight.normal,
+                        ),
+                      ),
+                      trailing: pendingCount > 0
+                          ? Container(
+                              padding: const EdgeInsets.all(8),
+                              decoration: const BoxDecoration(
+                                color: Colors.redAccent, 
+                                shape: BoxShape.circle
+                              ),
+                              child: Text(
+                                "$pendingCount",
+                                style: const TextStyle(
+                                  color: Colors.white, 
+                                  fontSize: 12, 
+                                  fontWeight: FontWeight.bold
+                                ),
+                              ),
+                            )
+                          : const Icon(Icons.arrow_forward_ios, size: 14, color: Colors.grey),
+                    ),
+                  );
+                },
+              ),
+              // === TAMAT INPUT BARU ===
             ],
           ),
         ),

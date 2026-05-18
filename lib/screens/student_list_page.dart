@@ -56,7 +56,7 @@ class StudentListPage extends StatelessWidget {
                   ),
                   trailing: const Icon(Icons.info_outline, color: Colors.grey),
                   onTap: () {
-                    // Later, you can add a "Student Details" view here
+                    
                   },
                 ),
               );

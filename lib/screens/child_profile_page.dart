@@ -46,7 +46,7 @@ class ChildProfilePage extends StatelessWidget {
                 ),
                 const SizedBox(height: 30),
                 
-                // MENGGUNAKAN 'student_name' SEPERTI DI DATABASE
+                
                 _buildInfoCard("Full Name", userData['student_name'] ?? "N/A"),
                 
                 _buildInfoCard("Age", "${userData['age'] ?? 'N/A'} Years Old"),

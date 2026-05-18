@@ -29,7 +29,7 @@ class NotificationsPage extends StatelessWidget {
             return const Center(child: CircularProgressIndicator());
           }
 
-          // Ambil stream kedua (notifications peribadi) melalui StreamBuilder kedua di dalam ini
+          
           return StreamBuilder<QuerySnapshot>(
             stream: FirebaseFirestore.instance
                 .collection('notifications')
@@ -48,7 +48,7 @@ class NotificationsPage extends StatelessWidget {
                 combinedList.addAll(personalSnapshot.data!.docs);
               }
 
-              // Susun mengikut masa terbaru secara manual menggunakan fungsi dart biasa
+            
               combinedList.sort((a, b) {
                 var dataA = a.data() as Map<String, dynamic>;
                 var dataB = b.data() as Map<String, dynamic>;
@@ -69,7 +69,7 @@ class NotificationsPage extends StatelessWidget {
                   final doc = combinedList[index];
                   final data = doc.data() as Map<String, dynamic>;
                   
-                  // Semak nama koleksi asal dokumen tersebut
+               
                   final bool isPayment = doc.reference.parent.id == 'notifications';
                   
                   String title = data['title'] ?? 'No Title';

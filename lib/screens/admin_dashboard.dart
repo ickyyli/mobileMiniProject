@@ -69,8 +69,6 @@ class AdminDashboard extends StatelessWidget {
 
             const SizedBox(height: 16),
 
-            // ================= STATS BAR =================
-
             Container(
               padding: const EdgeInsets.symmetric(vertical: 20),
 
@@ -94,8 +92,6 @@ class AdminDashboard extends StatelessWidget {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceAround,
                 children: [
-
-                  // ================= STUDENTS =================
 
                   StreamBuilder<QuerySnapshot>(
                     stream: FirebaseFirestore.instance
@@ -147,8 +143,6 @@ class AdminDashboard extends StatelessWidget {
                     },
                   ),
 
-                  // ================= ACTIVITIES =================
-
                   StreamBuilder<QuerySnapshot>(
                     stream: FirebaseFirestore.instance
                         .collection('activities')
@@ -169,7 +163,6 @@ class AdminDashboard extends StatelessWidget {
                     },
                   ),
 
-                  // ================= DUE PAYMENTS =================
 
                   StreamBuilder<QuerySnapshot>(
                     stream: FirebaseFirestore.instance
@@ -221,7 +214,6 @@ class AdminDashboard extends StatelessWidget {
 
             const SizedBox(height: 12),
 
-            // ================= GRID =================
 
             GridView.count(
               shrinkWrap: true,
@@ -330,7 +322,7 @@ class AdminDashboard extends StatelessWidget {
     );
   }
 
-  // ================= STAT ITEM =================
+ 
 
   Widget _buildStatItem(String value, String label) {
     return Column(
@@ -357,7 +349,6 @@ class AdminDashboard extends StatelessWidget {
     );
   }
 
-  // ================= ACTION CARD =================
 
   Widget _buildActionCard(
     BuildContext context,

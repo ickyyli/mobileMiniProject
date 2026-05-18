@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_storage/firebase_storage.dart'; // Already in your pubspec!
-import 'package:image_picker/image_picker.dart'; // Already in your pubspec!
+import 'package:firebase_storage/firebase_storage.dart'; 
+import 'package:image_picker/image_picker.dart'; 
 import 'dart:io';
 
 class ActivityLogPage extends StatefulWidget {
@@ -18,12 +18,10 @@ class ActivityLogPage extends StatefulWidget {
 class _ActivityLogPageState extends State<ActivityLogPage> {
   final TextEditingController _activityController = TextEditingController();
 
-  // Image State
   File? _selectedImage;
   final ImagePicker _picker = ImagePicker();
-
-  // Likert Scale State
   int _selectedEmotion = 3;
+  
   final List<Map<String, dynamic>> _emotions = [
     {'emoji': '😢', 'label': 'Sad', 'value': 1},
     {'emoji': '😕', 'label': 'Moody', 'value': 2},
@@ -35,7 +33,7 @@ class _ActivityLogPageState extends State<ActivityLogPage> {
   Future<void> _pickImage() async {
     final XFile? pickedFile = await _picker.pickImage(
       source: ImageSource.camera,
-      imageQuality: 50,
+      imageQuality: 50, 
     );
 
     if (pickedFile != null) {
@@ -53,7 +51,6 @@ class _ActivityLogPageState extends State<ActivityLogPage> {
       return;
     }
 
-    // Show a loading indicator
     showDialog(
       context: context,
       barrierDismissible: false,
@@ -63,7 +60,6 @@ class _ActivityLogPageState extends State<ActivityLogPage> {
     try {
       String imageUrl = "";
 
-      // 1. Upload Image if selected
       if (_selectedImage != null) {
         try {
           String fileName = 'activity_${DateTime.now().millisecondsSinceEpoch}.jpg';
@@ -76,32 +72,30 @@ class _ActivityLogPageState extends State<ActivityLogPage> {
           imageUrl = await snapshot.ref.getDownloadURL();
         } catch (imageError) {
           debugPrint("Image upload failed: $imageError");
-          // Optionally notify the user, but we continue to save the text update
         }
       }
 
-      // 2. Save to 'activities' collection
-      // Ensure 'student_id' matches the field in your 'users' collection (e.g., "S003")
+      // Menyimpan pautan data ke field 'image_url'
       await FirebaseFirestore.instance.collection('activities').add({
         'student_id': widget.studentId,
         'student_name': widget.studentName,
-        'activity_details': _activityController.text,
+        'activity_details': _activityController.text.trim(),
         'emotion_label': _emotions.firstWhere((e) => e['value'] == _selectedEmotion)['label'],
         'emotion_emoji': _emotions.firstWhere((e) => e['value'] == _selectedEmotion)['emoji'],
         'image_url': imageUrl,
-        'timestamp': FieldValue.serverTimestamp(), // Use server time for accurate sorting
-        'teacher_name': 'Teacher Bunga', // Matching your Firestore screenshot
+        'timestamp': FieldValue.serverTimestamp(), 
+        'teacher_name': 'Teacher Bunga', 
       });
 
       if (mounted) {
-        Navigator.pop(context); // Close loading dialog
-        Navigator.pop(context); // Go back to selection page
+        Navigator.pop(context); 
+        Navigator.pop(context); 
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Update posted successfully!')),
         );
       }
     } catch (e) {
-      if (mounted) Navigator.pop(context); // Close loading dialog
+      if (mounted) Navigator.pop(context); 
       debugPrint("Error saving: $e");
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Failed to save activity: $e')),
@@ -129,7 +123,6 @@ class _ActivityLogPageState extends State<ActivityLogPage> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Emotion Section
               const Text("How was their mood today?",
                   style: TextStyle(
                       fontSize: 16,
@@ -160,8 +153,6 @@ class _ActivityLogPageState extends State<ActivityLogPage> {
                 }).toList(),
               ),
               const SizedBox(height: 25),
-
-              // Image Section
               const Text("Add a Photo",
                   style: TextStyle(
                       fontSize: 16,
@@ -188,13 +179,10 @@ class _ActivityLogPageState extends State<ActivityLogPage> {
                             ])
                       : ClipRRect(
                           borderRadius: BorderRadius.circular(10),
-                          child:
-                              Image.file(_selectedImage!, fit: BoxFit.cover)),
+                          child: Image.file(_selectedImage!, fit: BoxFit.cover)),
                 ),
               ),
               const SizedBox(height: 25),
-
-              // Activity Details
               const Text("Activity Details",
                   style: TextStyle(
                       fontSize: 16,
@@ -209,7 +197,6 @@ class _ActivityLogPageState extends State<ActivityLogPage> {
                     border: OutlineInputBorder()),
               ),
               const SizedBox(height: 30),
-
               ElevatedButton(
                 onPressed: _saveActivity,
                 style: ElevatedButton.styleFrom(

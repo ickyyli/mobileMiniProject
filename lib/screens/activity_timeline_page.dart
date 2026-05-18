@@ -11,9 +11,14 @@ class ActivityTimelinePage extends StatelessWidget {
     final String? parentUid = FirebaseAuth.instance.currentUser?.uid;
 
     return Scaffold(
+      backgroundColor: const Color(0xFFF8F9FA),
       appBar: AppBar(
-        title: const Text("Daily Activity Proof"),
+        title: const Text(
+          "Daily Activity Proof",
+          style: TextStyle(fontWeight: FontWeight.bold),
+        ),
         backgroundColor: Colors.deepPurple[50],
+        elevation: 0,
       ),
       body: parentUid == null 
           ? const Center(child: Text("Please log in to view activities."))
@@ -29,6 +34,10 @@ class ActivityTimelinePage extends StatelessWidget {
 
                 var userData = userSnapshot.data!.data() as Map<String, dynamic>;
                 String myChildId = userData['student_id'] ?? '';
+
+                if (myChildId.isEmpty) {
+                  return const Center(child: Text("No student linked to this account."));
+                }
 
                 return StreamBuilder<QuerySnapshot>(
                   stream: FirebaseFirestore.instance
@@ -57,10 +66,9 @@ class ActivityTimelinePage extends StatelessWidget {
                         return _buildActivityCard(
                           context,
                           time: formattedTime,
-                          title: "${activity['emotion_emoji'] ?? ''} ${activity['emotion_label'] ?? 'Activity'}",
+                          title: "${activity['emotion_emoji'] ?? '😊'} ${activity['emotion_label'] ?? 'Activity'}",
                           description: activity['activity_details'] ?? '',
-                          imageUrl: activity['image_url'],
-                          type: activity['emotion_label'] ?? 'general',
+                          imageUrl: activity['image_url'], // Membaca field 'image_url' dari Firestore
                         );
                       },
                     );
@@ -75,56 +83,74 @@ class ActivityTimelinePage extends StatelessWidget {
     required String time, 
     required String title, 
     required String description, 
-    String? imageUrl, 
-    required String type
+    String? imageUrl,
   }) {
     return Card(
       margin: const EdgeInsets.only(bottom: 16),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
-      elevation: 2,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          if (imageUrl != null && imageUrl.isNotEmpty)
-            ClipRRect(
-              borderRadius: const BorderRadius.vertical(top: Radius.circular(15)),
-              child: Image.network(
-                imageUrl,
-                height: 200,
-                width: double.infinity,
-                fit: BoxFit.cover,
-                loadingBuilder: (context, child, loadingProgress) {
-                  if (loadingProgress == null) return child;
-                  return const SizedBox(
-                    height: 200,
-                    child: Center(child: CircularProgressIndicator()),
-                  );
-                },
-                errorBuilder: (context, error, stackTrace) => Container(
-                  height: 200,
-                  color: Colors.grey[200],
-                  child: const Icon(Icons.broken_image, size: 50, color: Colors.grey),
-                ),
-              ),
-            ),
-          Padding(
-            padding: const EdgeInsets.all(12.0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+      elevation: 1,
+      color: Colors.white,
+      child: Padding(
+        padding: const EdgeInsets.all(14.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text(title, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
-                    Text(time, style: const TextStyle(color: Colors.deepPurple, fontSize: 12)),
-                  ],
+                Text(
+                  title, 
+                  style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: Color(0xFF2D3142))
                 ),
-                const SizedBox(height: 4),
-                Text(description, style: const TextStyle(color: Colors.black54)),
+                Text(
+                  time, 
+                  style: const TextStyle(color: Colors.deepPurple, fontSize: 12, fontWeight: FontWeight.w600)
+                ),
               ],
             ),
-          ),
-        ], // Closed the Column children list properly here
+            
+            const SizedBox(height: 8),
+            
+            Text(
+              description, 
+              style: const TextStyle(color: Colors.black54, fontSize: 14)
+            ),
+
+            
+            if (imageUrl != null && imageUrl.trim().isNotEmpty) ...[
+              const SizedBox(height: 12),
+              ClipRRect(
+                borderRadius: BorderRadius.circular(12),
+                child: Image.network(
+                  imageUrl,
+                  height: 200,
+                  width: double.infinity,
+                  fit: BoxFit.cover,
+                  loadingBuilder: (context, child, loadingProgress) {
+                    if (loadingProgress == null) return child;
+                    return Container(
+                      height: 200,
+                      color: Colors.grey[100],
+                      child: const Center(child: CircularProgressIndicator()),
+                    );
+                  },
+                  errorBuilder: (context, error, stackTrace) => Container(
+                    height: 200,
+                    color: Colors.grey[200],
+                    child: const Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(Icons.broken_image_rounded, size: 40, color: Colors.grey),
+                        SizedBox(height: 4),
+                        Text("Gagal memuatkan imej", style: TextStyle(color: Colors.grey, fontSize: 12)),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ],
+        ),
       ),
     );
   }

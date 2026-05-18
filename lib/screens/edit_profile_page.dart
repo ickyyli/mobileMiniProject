@@ -21,7 +21,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
     _loadCurrentData();
   }
 
-  // Fungsi untuk tarik data sedia ada dari Firebase
+  
   Future<void> _loadCurrentData() async {
     String uid = FirebaseAuth.instance.currentUser!.uid;
     var doc = await FirebaseFirestore.instance.collection('users').doc(uid).get();

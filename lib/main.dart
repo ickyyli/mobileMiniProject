@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_messaging/firebase_messaging.dart'; // Ditambah untuk tugasan push notifications
 
 // Tambahan import fail konfigurasi Firebase
 import 'firebase_options.dart'; 
@@ -61,6 +62,36 @@ class _LoginPageState extends State<LoginPage> {
   final TextEditingController _passwordController = TextEditingController();
   bool _isLoading = false;
 
+  // Fungsi pembantu untuk menyimpan FCM Token peranti sebaik sahaja parent log masuk
+  Future<void> _saveParentDeviceToken(String uid) async {
+    try {
+      FirebaseMessaging messaging = FirebaseMessaging.instance;
+      
+      // Minta kebenaran sistem peranti (Sangat penting untuk Android 13+ & iOS)
+      await messaging.requestPermission(
+        alert: true,
+        badge: true,
+        sound: true,
+      );
+
+      // Ambil token unik peranti daripada Firebase Cloud Messaging
+      String? token = await messaging.getToken();
+
+      if (token != null && token.isNotEmpty) {
+        // Simpan/kemas kini medan fcmToken di dalam dokumen pengguna tersebut
+        await FirebaseFirestore.instance
+            .collection('users')
+            .doc(uid)
+            .update({
+          'fcmToken': token,
+        });
+        debugPrint("FCM Token berjaya disimpan untuk UID $uid: $token");
+      }
+    } catch (e) {
+      debugPrint("Gagal memproses pengurusan token peranti: $e");
+    }
+  }
+
   Future<void> _handleLogin() async {
     String email = _emailController.text.trim();
     String password = _passwordController.text.trim();
@@ -88,12 +119,18 @@ class _LoginPageState extends State<LoginPage> {
 
     // 3. PARENT LOGIN
     try {
-      await FirebaseAuth.instance.signInWithEmailAndPassword(
+      UserCredential userCredential = await FirebaseAuth.instance.signInWithEmailAndPassword(
         email: email,
         password: password,
       );
 
       _logToFirestore('parent_login', email);
+
+      // AUTOMATIK: Simpan token peranti parent ke Firestore sebaik sahaja berjaya log masuk
+      if (userCredential.user != null) {
+        await _saveParentDeviceToken(userCredential.user!.uid);
+      }
+
       _navigateTo(const ParentDashboard());
       
     } on FirebaseAuthException catch (e) {

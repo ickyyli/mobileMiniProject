@@ -51,6 +51,15 @@ class _RegisterStudentPageState extends State<RegisterStudentPage> {
     setState(() => _isLoading = true);
 
     try {
+      // 1. Dapatkan jumlah rekod sedia ada untuk menjana student_id pendek yang unik
+      final usersRef = FirebaseFirestore.instance.collection('users');
+      final querySnapshot = await usersRef.where('role', isEqualTo: 'parent').get();
+      int currentCount = querySnapshot.docs.length;
+      
+      
+      int nextSerialNumber = currentCount + 1;
+      String generatedShortId = "S${nextSerialNumber.toString().padLeft(3, '0')}";
+
       UserCredential userCredential = await FirebaseAuth.instance.createUserWithEmailAndPassword(
         email: _emailController.text.trim(),
         password: _passwordController.text.trim(),
@@ -68,7 +77,9 @@ class _RegisterStudentPageState extends State<RegisterStudentPage> {
         imageUrl = await ref.getDownloadURL(); 
       }
 
-      await FirebaseFirestore.instance.collection('users').doc(userCredential.user!.uid).set({
+     
+      await usersRef.doc(userCredential.user!.uid).set({
+        'student_id': generatedShortId, 
         'student_name': _nameController.text.trim(),
         'email': _emailController.text.trim(),
         'role': 'parent',
@@ -82,7 +93,7 @@ class _RegisterStudentPageState extends State<RegisterStudentPage> {
 
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text("Pendaftaran Berjaya!"), backgroundColor: Colors.green)
+          SnackBar(content: Text("Pendaftaran Berjaya! ID Murid: $generatedShortId"), backgroundColor: Colors.green)
         );
 
         Navigator.pushReplacement(
@@ -157,7 +168,6 @@ class _RegisterStudentPageState extends State<RegisterStudentPage> {
             _buildTextField(_passwordController, "Temporary Password", Icons.lock, isPassword: true),
             const SizedBox(height: 30),
             
-            // Bahagian yang menyebabkan error biasanya di sini
             _isLoading 
               ? const Center(child: CircularProgressIndicator()) 
               : ElevatedButton(

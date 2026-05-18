@@ -30,13 +30,15 @@ class StudentQrPage extends StatelessWidget {
             itemBuilder: (context, index) {
               final data = docs[index].data() as Map<String, dynamic>;
               final String name = data['student_name'] ?? "Unknown Student";
-              final String studentId = docs[index].id;
+              
+            
+              final String studentId = data['student_id'] ?? "No ID";
 
               return Card(
                 margin: const EdgeInsets.symmetric(horizontal: 15, vertical: 8),
                 child: ListTile(
                   title: Text(name, style: const TextStyle(fontWeight: FontWeight.bold)),
-                  subtitle: Text("ID: $studentId"),
+                  subtitle: Text("ID Short: $studentId"),
                   trailing: ElevatedButton(
                     onPressed: () {
                       // Buka halaman baru untuk QR
@@ -59,7 +61,6 @@ class StudentQrPage extends StatelessWidget {
   }
 }
 
-// HALAMAN BARU UNTUK PAPAR QR FULL SCREEN
 class FullScreenQrPage extends StatelessWidget {
   final String name;
   final String id;
@@ -86,13 +87,13 @@ class FullScreenQrPage extends StatelessWidget {
                 ],
               ),
               child: QrImageView(
-                data: id,
+                data: id, 
                 version: QrVersions.auto,
                 size: 280.0,
               ),
             ),
             const SizedBox(height: 20),
-            Text("Student ID: $id", style: const TextStyle(color: Colors.grey)),
+            Text("Student ID: $id", style: const TextStyle(color: Colors.grey, fontSize: 16, fontWeight: FontWeight.bold)),
             const SizedBox(height: 40),
             ElevatedButton.icon(
               onPressed: () => Navigator.pop(context),

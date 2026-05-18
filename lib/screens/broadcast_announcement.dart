@@ -30,7 +30,7 @@ class _BroadcastAnnouncementState extends State<BroadcastAnnouncement> {
         'message': _messageController.text.trim(),
         'timestamp': FieldValue.serverTimestamp(),
         'senderId': FirebaseAuth.instance.currentUser?.uid,
-        'senderName': 'Teacher', // You can later fetch the actual name from Firestore
+        'senderName': 'Teacher', 
       });
 
       ScaffoldMessenger.of(context).showSnackBar(

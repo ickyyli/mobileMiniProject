@@ -147,9 +147,6 @@ class ParentDashboard extends StatelessWidget {
     );
   }
 
-  // =========================================
-  // MENU CARD WIDGET
-  // =========================================
 
   Widget _buildWideMenuCard(
     BuildContext context,
