@@ -3,6 +3,9 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
+// Tambahan import fail konfigurasi Firebase
+import 'firebase_options.dart'; 
+
 // Farah's Pages
 import 'screens/admin_dashboard.dart'; 
 import 'screens/parent_dashboard.dart'; 
@@ -41,8 +44,6 @@ class MyApp extends StatelessWidget {
       routes: {
         '/': (context) => const LoginPage(),
         '/teacher_dashboard': (context) => const TeacherDashboard(),
-        // You can add others here too if you want to use them by name:
-        // '/admin_dashboard': (context) => const AdminDashboard(),
       },
     );
   }
@@ -81,7 +82,6 @@ class _LoginPageState extends State<LoginPage> {
     // 2. TEACHER LOGIN
     if (email == "teacher@kindisync.com" && password == "teacher123") {
       _logToFirestore('teacher_login', email);
-      // Using pushReplacement to prevent going back to login
       _navigateTo(const TeacherDashboard());
       return;
     }
