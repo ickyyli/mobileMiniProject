@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'edit_profile_page.dart';
-import 'security_page.dart';
 import 'user_management_page.dart';
 import 'notification_settings_page.dart';
 
@@ -23,13 +22,6 @@ class SettingsMenuPage extends StatelessWidget {
             title: 'Edit Profile',
             subtitle: 'Update your personal information',
             targetPage: const EditProfilePage(),
-          ),
-          _buildSettingsItem(
-            context,
-            icon: Icons.security_outlined,
-            title: 'Security',
-            subtitle: 'Change password & access',
-            targetPage: const SecurityPage(),
           ),
           _buildSettingsItem(
             context,

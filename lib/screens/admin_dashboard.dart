@@ -3,10 +3,8 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../main.dart';
 import 'register_student_page.dart';
-import 'student_qr_page.dart';
 import 'broadcast_page.dart';
 import 'settings_menu_page.dart';
-import 'admin_payment_page.dart';
 
 class AdminDashboard extends StatelessWidget {
   const AdminDashboard({super.key});
@@ -164,39 +162,6 @@ class AdminDashboard extends StatelessWidget {
                   ),
 
 
-                  StreamBuilder<QuerySnapshot>(
-                    stream: FirebaseFirestore.instance
-                        .collection('payment')
-                        .snapshots(),
-
-                    builder: (context, snapshot) {
-
-                      String count = "0";
-
-                      if (snapshot.hasData) {
-
-                        final dueDocs =
-                            snapshot.data!.docs.where((doc) {
-
-                          String status =
-                              (doc['status'] ?? '')
-                                  .toString()
-                                  .toLowerCase();
-
-                          return status == 'pending' ||
-                              status == 'overdue';
-
-                        }).toList();
-
-                        count = dueDocs.length.toString();
-                      }
-
-                      return _buildStatItem(
-                        count,
-                        "Due",
-                      );
-                    },
-                  ),
                 ],
               ),
             ),
@@ -243,29 +208,6 @@ class AdminDashboard extends StatelessWidget {
 
                 _buildActionCard(
                   context,
-                  "Attendance",
-                  Icons.qr_code_rounded,
-                  Colors.blue,
-
-                  () => Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) =>
-                          const StudentQrPage(),
-                    ),
-                  ),
-                ),
-
-                _buildActionCard(
-                  context,
-                  "Safety",
-                  Icons.security_rounded,
-                  Colors.redAccent,
-                  () {},
-                ),
-
-                _buildActionCard(
-                  context,
                   "Messages",
                   Icons.chat_bubble_rounded,
                   Colors.orange,
@@ -276,23 +218,6 @@ class AdminDashboard extends StatelessWidget {
                       MaterialPageRoute(
                         builder: (context) =>
                             const BroadcastPage(),
-                      ),
-                    );
-                  },
-                ),
-
-                _buildActionCard(
-                  context,
-                  "Payments",
-                  Icons.payment_rounded,
-                  Colors.green,
-
-                  () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) =>
-                            const AdminPaymentPage(),
                       ),
                     );
                   },

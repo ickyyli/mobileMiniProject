@@ -3,9 +3,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import '../main.dart';
 import 'child_profile_page.dart';
 import 'notifications_page.dart';
-import 'payment_page.dart';
 import 'activity_timeline_page.dart';
-import 'pickup_registry_page.dart';
 import 'parent_settings_page.dart';
 import 'attendance_page.dart';
 
@@ -102,24 +100,6 @@ class ParentDashboard extends StatelessWidget {
                   Icons.timeline_rounded,
                   Colors.orange,
                   const ActivityTimelinePage(),
-                ),
-
-                // PAYMENT
-                _buildWideMenuCard(
-                  context,
-                  "Payments",
-                  Icons.account_balance_wallet_rounded,
-                  Colors.green,
-                  const PaymentPage(),
-                ),
-
-                // PICKUP
-                _buildWideMenuCard(
-                  context,
-                  "Pickup",
-                  Icons.assignment_ind_rounded,
-                  Colors.redAccent,
-                  const PickupRegistryPage(),
                 ),
 
                 // ATTENDANCE FIXED

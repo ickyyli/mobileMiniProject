@@ -3,8 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart'; 
-import 'package:image_picker/image_picker.dart';      
-import 'student_qr_page.dart'; 
+import 'package:image_picker/image_picker.dart';
 
 class RegisterStudentPage extends StatefulWidget {
   const RegisterStudentPage({super.key});
@@ -96,10 +95,7 @@ class _RegisterStudentPageState extends State<RegisterStudentPage> {
           SnackBar(content: Text("Pendaftaran Berjaya! ID Murid: $generatedShortId"), backgroundColor: Colors.green)
         );
 
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(builder: (context) => const StudentQrPage()),
-        );
+        Navigator.pop(context);
       }
     } catch (e) {
       if (mounted) {
