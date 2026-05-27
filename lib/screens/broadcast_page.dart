@@ -26,9 +26,9 @@ class _BroadcastPageState extends State<BroadcastPage> {
 
     try {
       // Menambah data ke collection 'announcements' yang Farah buat tadi
-      await FirebaseFirestore.instance.collection('announcements').add({
+      await FirebaseFirestore.instance.collection('broadcasts').add({
         'title': _titleController.text.trim(),
-        'content': _messageController.text.trim(),
+        'message': _messageController.text.trim(),
         'timestamp': FieldValue.serverTimestamp(),
       });
 

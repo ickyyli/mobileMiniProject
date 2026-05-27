@@ -24,6 +24,7 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
         Navigator.pop(context); // Go back to login
       }
     } on FirebaseAuthException catch (e) {
+      if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
             content: Text(e.message ?? "An error occurred"),

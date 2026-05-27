@@ -88,8 +88,8 @@ class NotificationsPage extends StatelessWidget {
                       contentPadding: const EdgeInsets.all(12),
                       leading: CircleAvatar(
                         backgroundColor: isPayment 
-                            ? Colors.green.withOpacity(0.1) 
-                            : Colors.orangeAccent.withOpacity(0.1),
+                            ? Colors.green.withValues(alpha: 0.1) 
+                            : Colors.orangeAccent.withValues(alpha: 0.1),
                         radius: 24,
                         child: Icon(
                           isPayment ? Icons.payment_rounded : Icons.campaign_rounded, 

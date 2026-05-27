@@ -125,13 +125,12 @@ class _LoginPageState extends State<LoginPage> {
       );
 
       _logToFirestore('parent_login', email);
-
-      // AUTOMATIK: Simpan token peranti parent ke Firestore sebaik sahaja berjaya log masuk
-      if (userCredential.user != null) {
-        await _saveParentDeviceToken(userCredential.user!.uid);
-      }
-
       _navigateTo(const ParentDashboard());
+
+      // Save FCM token in background — do not block navigation
+      if (userCredential.user != null) {
+        _saveParentDeviceToken(userCredential.user!.uid);
+      }
       
     } on FirebaseAuthException catch (e) {
       String message = "An error occurred.";

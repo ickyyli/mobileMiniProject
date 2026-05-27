@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:intl/intl.dart';
+import 'qr_scanner_page.dart';
 
 class MarkAttendancePage extends StatefulWidget {
   const MarkAttendancePage({super.key});
@@ -69,6 +70,19 @@ class _MarkAttendancePageState extends State<MarkAttendancePage> {
         title: const Text('Mark Attendance'),
         backgroundColor: Colors.teal,
         foregroundColor: Colors.white,
+        actions: [
+          IconButton(
+            tooltip: 'Scan QR',
+            icon: const Icon(Icons.qr_code_scanner),
+            onPressed: () async {
+              await Navigator.push(
+                context,
+                MaterialPageRoute(builder: (_) => const QRScannerPage()),
+              );
+              if (mounted) setState(() => _checked.clear());
+            },
+          ),
+        ],
       ),
       body: Column(
         children: [

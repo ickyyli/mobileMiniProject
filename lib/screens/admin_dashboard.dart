@@ -5,6 +5,7 @@ import '../main.dart';
 import 'register_student_page.dart';
 import 'broadcast_page.dart';
 import 'settings_menu_page.dart';
+import 'user_management_page.dart';
 
 class AdminDashboard extends StatelessWidget {
   const AdminDashboard({super.key});
@@ -184,10 +185,10 @@ class AdminDashboard extends StatelessWidget {
               shrinkWrap: true,
               physics: const NeverScrollableScrollPhysics(),
 
-              crossAxisCount: 3,
+              crossAxisCount: 2,
               crossAxisSpacing: 10,
               mainAxisSpacing: 10,
-              childAspectRatio: 0.75,
+              childAspectRatio: 1.1,
 
               children: [
 
@@ -225,19 +226,28 @@ class AdminDashboard extends StatelessWidget {
 
                 _buildActionCard(
                   context,
+                  "Users",
+                  Icons.manage_accounts_rounded,
+                  Colors.teal,
+                  () => Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => const UserManagementPage(),
+                    ),
+                  ),
+                ),
+
+                _buildActionCard(
+                  context,
                   "Settings",
                   Icons.settings_rounded,
                   Colors.grey,
-
-                  () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) =>
-                            const SettingsMenuPage(),
-                      ),
-                    );
-                  },
+                  () => Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => const SettingsMenuPage(),
+                    ),
+                  ),
                 ),
               ],
             ),

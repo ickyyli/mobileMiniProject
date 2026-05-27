@@ -1,45 +1,24 @@
-<<<<<<< HEAD
-<<<<<<< HEAD
-# kindisync
+# KindiSync
 
-A new Flutter project.
+A Flutter + Firebase mobile app for kindergarten management.
+Supports three roles: **Admin**, **Teacher**, and **Parent**.
+
+## Features
+
+- Admin: user management, student registration, broadcast notifications, activity logs
+- Teacher: daily attendance (QR scan + manual checklist), student list, daily activity logs, broadcasts
+- Parent: child profile with QR code, attendance summary, activity timeline, push notifications, settings
+- Firebase Auth, Cloud Firestore (full CRUD), Firebase Storage, Firebase Cloud Messaging
 
 ## Getting Started
 
-This project is a starting point for a Flutter application.
+```bash
+flutter pub get
+flutter run
+```
 
 A few resources to get you started if this is your first Flutter project:
 
 - [Learn Flutter](https://docs.flutter.dev/get-started/learn-flutter)
 - [Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
 - [Flutter learning resources](https://docs.flutter.dev/reference/learning-resources)
-
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
-=======
-# KindiSyncFYP
->>>>>>> aeaf3eca034bced4c8e6f462ea7cfcbb782ae2bc
-=======
-<<<<<<< HEAD
-# kindisync
-
-A new Flutter project.
-
-## Getting Started
-
-This project is a starting point for a Flutter application.
-
-A few resources to get you started if this is your first Flutter project:
-
-- [Learn Flutter](https://docs.flutter.dev/get-started/learn-flutter)
-- [Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Flutter learning resources](https://docs.flutter.dev/reference/learning-resources)
-
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
-=======
-# KindiSyncFYP
->>>>>>> aeaf3eca034bced4c8e6f462ea7cfcbb782ae2bc
->>>>>>> 4f21c3e2be8db60d783a51f7ace560c38e8060ff

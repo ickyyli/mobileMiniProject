@@ -56,7 +56,31 @@ class StudentListPage extends StatelessWidget {
                   ),
                   trailing: const Icon(Icons.info_outline, color: Colors.grey),
                   onTap: () {
-                    
+                    showDialog(
+                      context: context,
+                      builder: (_) => AlertDialog(
+                        title: Text(studentName),
+                        content: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text('Class: $className'),
+                            const SizedBox(height: 6),
+                            Text('Parent: $parentName'),
+                            const SizedBox(height: 6),
+                            Text('Student ID: ${data['student_id'] ?? '-'}'),
+                            const SizedBox(height: 6),
+                            Text('Email: ${data['email'] ?? '-'}'),
+                          ],
+                        ),
+                        actions: [
+                          TextButton(
+                            onPressed: () => Navigator.pop(context),
+                            child: const Text('Close'),
+                          ),
+                        ],
+                      ),
+                    );
                   },
                 ),
               );

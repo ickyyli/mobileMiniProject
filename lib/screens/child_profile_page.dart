@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:intl/intl.dart';
+import 'package:qr_flutter/qr_flutter.dart';
 
 class ChildProfilePage extends StatelessWidget {
   const ChildProfilePage({super.key});
@@ -53,6 +54,8 @@ class ChildProfilePage extends StatelessWidget {
                 _buildInfoCard("Assigned Teacher", userData['teacherName'] ?? "Teacher Not Assigned"),
 
                 const SizedBox(height: 12),
+                if (studentId.isNotEmpty) _AttendanceQrCard(studentId: studentId),
+                const SizedBox(height: 12),
                 _AttendanceSummaryCard(studentId: studentId),
               ],
             ),
@@ -71,6 +74,47 @@ class ChildProfilePage extends StatelessWidget {
         contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
         title: Text(label, style: const TextStyle(fontSize: 13, color: Colors.grey)),
         subtitle: Text(value, style: const TextStyle(fontSize: 17, fontWeight: FontWeight.bold, color: Colors.black87)),
+      ),
+    );
+  }
+}
+
+class _AttendanceQrCard extends StatelessWidget {
+  final String studentId;
+  const _AttendanceQrCard({required this.studentId});
+
+  @override
+  Widget build(BuildContext context) {
+    return Card(
+      elevation: 2,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          children: [
+            const Text(
+              "Attendance QR Code",
+              style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: Colors.black87),
+            ),
+            const SizedBox(height: 4),
+            const Text(
+              "Show this to your teacher to mark attendance",
+              style: TextStyle(fontSize: 12, color: Colors.grey),
+            ),
+            const SizedBox(height: 12),
+            QrImageView(
+              data: studentId,
+              version: QrVersions.auto,
+              size: 180,
+              backgroundColor: Colors.white,
+            ),
+            const SizedBox(height: 8),
+            Text(
+              "ID: $studentId",
+              style: const TextStyle(fontSize: 12, color: Colors.black54),
+            ),
+          ],
+        ),
       ),
     );
   }

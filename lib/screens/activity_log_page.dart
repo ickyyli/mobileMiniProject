@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_storage/firebase_storage.dart'; 
-import 'package:image_picker/image_picker.dart'; 
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_storage/firebase_storage.dart';
+import 'package:image_picker/image_picker.dart';
 import 'dart:io';
 
 class ActivityLogPage extends StatefulWidget {
@@ -84,7 +85,7 @@ class _ActivityLogPageState extends State<ActivityLogPage> {
         'emotion_emoji': _emotions.firstWhere((e) => e['value'] == _selectedEmotion)['emoji'],
         'image_url': imageUrl,
         'timestamp': FieldValue.serverTimestamp(), 
-        'teacher_name': 'Teacher Bunga', 
+        'teacher_name': FirebaseAuth.instance.currentUser?.email ?? 'Teacher',
       });
 
       if (mounted) {
@@ -95,8 +96,9 @@ class _ActivityLogPageState extends State<ActivityLogPage> {
         );
       }
     } catch (e) {
-      if (mounted) Navigator.pop(context); 
       debugPrint("Error saving: $e");
+      if (!mounted) return;
+      Navigator.pop(context);
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Failed to save activity: $e')),
       );
@@ -167,7 +169,7 @@ class _ActivityLogPageState extends State<ActivityLogPage> {
                   decoration: BoxDecoration(
                     color: Colors.grey[200],
                     borderRadius: BorderRadius.circular(10),
-                    border: Border.all(color: Colors.teal.withOpacity(0.3)),
+                    border: Border.all(color: Colors.teal.withValues(alpha: 0.3)),
                   ),
                   child: _selectedImage == null
                       ? const Column(
